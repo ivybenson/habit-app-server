@@ -1,1 +1,0 @@
-/* users only need post */
