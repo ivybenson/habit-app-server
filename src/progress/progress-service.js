@@ -18,9 +18,6 @@ const ProgressService = {
   deleteProgress(knex, id) {
     return knex("progress").where({ id }).delete();
   },
-  updateProgress(knex, id, newprogressFields) {
-    return knex("progress").where({ id }).update(newprogressFields);
-  },
 };
 
 module.exports = ProgressService;
