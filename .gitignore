@@ -1,3 +1,4 @@
-node_nodules
+node_modules
 .env
 *.log
+README.md
