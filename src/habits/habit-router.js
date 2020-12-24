@@ -28,10 +28,10 @@ habitRouter
   })
 
   .post(bodyParser, (req, res, next) => {
-    const { name, folderid, content } = req.body;
-    const newHabit = { name, content, folderid };
+    const { title, frequency, note } = req.body;
+    const newHabit = { title, frequency, note };
 
-    for (const field of ["name", "content", "folderid"]) {
+    for (const field of ["title", "frequency", "note"]) {
       if (!newHabit[field]) {
         logger.error(`${field} is required`);
         return res.status(400).send({
@@ -90,15 +90,15 @@ habitRouter
   })
 
   .patch(bodyParser, (req, res, next) => {
-    const { name, content } = req.body;
-    const habitToUpdate = { name, content };
+    const { title, frequency, note } = req.body;
+    const habitToUpdate = { title, frequency, note };
 
     const numberOfValues = Object.values(habitToUpdate).filter(Boolean).length;
     if (numberOfValues === 0) {
       logger.error(`Invalid update without required fields`);
       return res.status(400).json({
         error: {
-          message: `Request body must content either 'name' or 'content'`,
+          message: `Request body must content either 'title', 'frequency' or 'note'`,
         },
       });
     }
@@ -109,7 +109,7 @@ habitRouter
 
     HabitsService.updateHabit(
       req.app.get("db"),
-      req.params.folder_id,
+      req.params.habit_id,
       habitToUpdate
     )
       .then((numRowsAffected) => {

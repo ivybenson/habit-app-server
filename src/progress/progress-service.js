@@ -1,10 +1,10 @@
 const ProgressService = {
-  getAllprogress(knex) {
+  getAllProgress(knex) {
     return knex.select("*").from("progress");
   },
 
-  getprogressById(knex, id) {
-    return knex.from("progress").select("*").where({ id }).first();
+  getProgressByHabit(knex, habit_id) {
+    return knex.from("progress").select("*").where({ habit_id }).first();
   },
 
   insertProgress(knex, newProgress) {

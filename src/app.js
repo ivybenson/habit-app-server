@@ -4,7 +4,10 @@ const morgan = require("morgan");
 const cors = require("cors");
 const helmet = require("helmet");
 const { NODE_ENV } = require("./config");
-const { validateBearerToken } = require("./validate-bearer-token");
+const validateBearerToken = require("./validate-bearer-token");
+const UsersRouter = require("./users/users-router");
+const HabitsRouter = require("./habits/habit-router");
+const ProgressRouter = require("./progress/progress-router");
 const app = express();
 
 app.use(
@@ -14,11 +17,11 @@ app.use(
 );
 app.use(cors());
 app.use(helmet());
-app.use(validateBearerToken);
+// app.use(validateBearerToken);
 
 app.use("/api/users", UsersRouter);
 app.use("/api/habits", HabitsRouter);
-app.use("/api/progress", ProgresssRouter);
+app.use("/api/progress", ProgressRouter);
 
 app.get("/", (req, res) => {
   res.send("Hello, world!");

@@ -7,6 +7,10 @@ const HabitsService = {
     return knex.from("habits").select("*").where({ id }).first();
   },
 
+  getHabitsByUser(knex, user_id) {
+    return knex.from("habits").select("*").where({ user_id }).first();
+  },
+
   insertHabit(knex, newHabit) {
     return knex
       .insert(newHabit)
@@ -23,4 +27,4 @@ const HabitsService = {
   },
 };
 
-module.exports = habitsService;
+module.exports = HabitsService;
