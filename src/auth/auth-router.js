@@ -1,7 +1,6 @@
 const express = require("express");
 const AuthService = require("./auth-service");
 const Knex = require("knex");
-const AuthService = require("./auth-service");
 
 const authRouter = express.Router();
 const bodyParser = express.json();
@@ -23,13 +22,26 @@ authRouter
       }
     }
 
-    AuthService.getUserWithEmail(knex, email).then((dbUser) => {
+    AuthService.getUserWithEmail(knexInstance, email).then((dbUser) => {
       if (!dbUser) {
         return res.status(400).json({
           error: "Incorrect email or password",
         });
       }
-      res.send("ok");
+      AuthService.comparePasswords(password, dbUser.password).then(
+        (isMatch) => {
+          if (!isMatch) {
+            return res.status(400).json({
+              error: "Incorrect email or password",
+            });
+          }
+          const subject = dbUser.email;
+          const payload = { user_is: dbUser.id };
+          res.send({
+            authToken: AuthService.createJwt(subject, payload),
+          });
+        }
+      );
     });
   });
 

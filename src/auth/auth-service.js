@@ -1,3 +1,8 @@
+const knex = require("knex");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const config = require("../config");
+
 const AuthService = {
   getUserWithEmail(knex, email) {
     return knex("users")
@@ -5,15 +10,14 @@ const AuthService = {
       .first()
       .then((user) => user);
   },
-  insertUser(knex, newUser) {
-    return knex
-      .insert(newUser)
-      .into("users")
-      .returning("*")
-      .then((user) => user);
+  comparePasswords(password, hash) {
+    return bcrypt.compare(password, hash);
   },
-  hashPassword(password) {
-    return bcrypt.hash(password, 12);
+  createJwt(subject, payload) {
+    return jwt.sign(payload, config.JWT_SECRET, {
+      subject,
+      algorithm: "HS256",
+    });
   },
 };
 
