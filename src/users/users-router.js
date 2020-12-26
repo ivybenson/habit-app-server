@@ -1,17 +1,18 @@
-const path = require("path");
 const express = require("express");
 const xss = require("xss");
 const logger = require("../logger");
 const UsersService = require("./users-service");
 const { getUsersValidationError } = require("./users-validator");
+const Knex = require("knex");
+const bcrypt = require("bcryptjs");
 
 const usersRouter = express.Router();
 const bodyParser = express.json();
 
-const SerializeUsers = (users) => ({
-  email: xss(users.email),
-  password: xss(users.password),
-  timestamp: users.timestamp,
+const SerializeUser = (user) => ({
+  id: user.id,
+  email: xss(user.email),
+  datecreated: user.datecreated,
 });
 
 //auth videos support guide
@@ -19,40 +20,57 @@ const SerializeUsers = (users) => ({
 usersRouter
   .route("/")
 
-  .get((req, res, next) => {
-    UsersService.getAllUsers(req.app.get("db"))
-      .then((users) => {
-        res.json(users.map(SerializeUsers));
-      })
-      .catch(next);
+  .all((req, res, next) => {
+    knexInstance = req.app.get("db");
+    next();
   })
+  .post(bodyParser, (req, res) => {
+    const { password, email, confirmPassword } = req.body;
+    const REGEX_UPPER_LOWER_NUMBER_SPECIAL = /(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@\$&\^&])[\S]+/;
 
-  .post(bodyParser, (req, res, next) => {
-    const { email, password } = req.body;
-    const newuser = { email, password };
-
-    for (const field of ["email", "password"]) {
-      if (!newuser[field]) {
-        logger.error(`${field} is required`);
-        return res.status(400).send({
-          error: { message: `'${field}' is required` },
+    for (const field of ["email", "password", "confirmPassword"]) {
+      if (!req.body[field]) {
+        return res.status(400).json({
+          error: `Missing ${field}`,
         });
       }
     }
 
-    const error = getUsersValidationError(newuser);
+    if (password.length <= 3) {
+      res.status(400).json({
+        error: "Password must be 4 or more characters",
+      });
+    }
+    if (!REGEX_UPPER_LOWER_NUMBER_SPECIAL.test(password)) {
+      res.status(400).json({
+        error:
+          "Password must contain one upper case character, one lower case character, one special character and one number ",
+      });
+    }
+    if (!password === confirmPassword) {
+      res.status(400).json({
+        error: "Password must match password confirmation",
+      });
+    }
 
-    if (error) return res.status(400).send(error);
+    UsersService.hasUserWithEmail(knexInstance, email).then((hasUser) => {
+      if (hasUser) {
+        return res.status(400).json({
+          error: "Email already used.",
+        });
+      }
 
-    UsersService.insertUser(req.app.get("db"), newuser)
-      .then((user) => {
-        logger.info(`user with id ${user.id} created.`);
-        res
-          .status(201)
-          .location(path.posix.join(req.originalUrl, `${user.id}`))
-          .json(SerializeUsers(user));
-      })
-      .catch(next);
+      return UsersService.hashPassword(password).then((hashedPassword) => {
+        const newUser = {
+          email,
+          password: hashedPassword,
+        };
+
+        return UsersService.insertUser(knexInstance, newUser).then((user) => {
+          res.status(201).json(SerializeUser(user));
+        });
+      });
+    });
   });
 
 module.exports = usersRouter;
