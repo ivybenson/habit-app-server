@@ -5,6 +5,7 @@ const UsersService = require("./users-service");
 const { getUsersValidationError } = require("./users-validator");
 const Knex = require("knex");
 const bcrypt = require("bcryptjs");
+const { requireAuth } = require("../middleware/jwt-auth");
 
 const usersRouter = express.Router();
 const bodyParser = express.json();
@@ -23,6 +24,9 @@ usersRouter
   .all((req, res, next) => {
     knexInstance = req.app.get("db");
     next();
+  })
+  .get(requireAuth, (req, res) => {
+    res.json(req.user);
   })
   .post(bodyParser, (req, res) => {
     const { password, email, confirmPassword } = req.body;
