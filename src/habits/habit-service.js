@@ -8,7 +8,11 @@ const HabitsService = {
   },
 
   getHabitsByUser(knex, user_id) {
-    return knex.from("habits").select("*").where({ user_id }).first();
+    return knex
+      .from("habits")
+      .select("*")
+      .where({ user_id })
+      .orderBy("created", "desc");
   },
 
   insertHabit(knex, newHabit) {

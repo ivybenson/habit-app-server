@@ -1,1 +1,1 @@
-TRUNCATE habits;
+DROP TABLE IF EXISTS habits;

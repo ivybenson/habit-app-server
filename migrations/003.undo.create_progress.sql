@@ -1,1 +1,1 @@
-TRUNCATE progress;
+DROP TABLE IF EXISTS progress;

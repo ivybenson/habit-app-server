@@ -5,6 +5,8 @@ const logger = require("../logger");
 const HabitsService = require("./habit-service");
 const { getHabitsValidationError } = require("./habit-validator");
 
+const { requireAuth } = require("../middleware/jwt-auth");
+
 const habitRouter = express.Router();
 const bodyParser = express.json();
 
@@ -12,26 +14,28 @@ const SerializeHabits = (habits) => ({
   id: habits.id,
   title: xss(habits.title),
   timestamp: habits.timestamp,
-  userid: xss(habits.userid),
-  note: xss(habits.content),
+  user_id: xss(habits.user_id),
+  frequency: habits.frequency,
+  note: xss(habits.note),
 });
 
 habitRouter
   .route("/")
 
-  .get((req, res, next) => {
-    HabitsService.getAllHabits(req.app.get("db"))
+  .get(requireAuth, (req, res, next) => {
+    console.log({ user: req.user });
+    HabitsService.getHabitsByUser(req.app.get("db"), req.user.id)
       .then((habits) => {
         res.json(habits.map(SerializeHabits));
       })
       .catch(next);
   })
 
-  .post(bodyParser, (req, res, next) => {
+  .post(requireAuth, bodyParser, (req, res, next) => {
     const { title, frequency, note } = req.body;
     const newHabit = { title, frequency, note };
 
-    for (const field of ["title", "frequency", "note"]) {
+    for (const field of ["title", "frequency"]) {
       if (!newHabit[field]) {
         logger.error(`${field} is required`);
         return res.status(400).send({
@@ -40,11 +44,14 @@ habitRouter
       }
     }
 
+    newHabit.user_id = req.user.id;
+    newHabit.frequency = Number(newHabit.frequency);
+
     const error = getHabitsValidationError(newHabit);
 
     if (error) return res.status(400).send(error);
 
-    HabitsService.insertNote(req.app.get("db"), newHabit)
+    HabitsService.insertHabit(req.app.get("db"), newHabit)
       .then((habit) => {
         logger.info(`habit with id ${habit.id} created.`);
         res

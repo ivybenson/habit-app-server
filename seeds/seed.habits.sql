@@ -1,4 +1,4 @@
-INSERT INTO habits ( title, frequency, note, userid)
+INSERT INTO habits ( title, frequency, note, user_id)
 VALUES
   ('Run in the morning', 4, 'Consistency is key!', 1 ),
   ('Journal for 10 minutes', 7, 'Fill up that journal', 1 ),

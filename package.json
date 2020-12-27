@@ -27,6 +27,7 @@
     "morgan": "^1.10.0",
     "node": "^15.0.1",
     "path": "^0.12.7",
+    "postgrator-cli": "^4.0.0",
     "valid-url": "^1.0.9",
     "winston": "^3.3.3",
     "xss": "^1.0.8"
