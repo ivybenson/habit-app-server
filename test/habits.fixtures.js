@@ -10,18 +10,18 @@ function makeHabitArray() {
     },
     {
       id: 2,
-      title: "journaling",
+      title: "running",
       frequency: 5,
       created: "2020-01-04T00:00:00.000Z",
-      note: "Get your thoughts down every morning",
+      note: "At least a mile",
       user_id: 3,
     },
     {
       id: 3,
-      title: "journaling",
+      title: "practice coding",
       frequency: 5,
       created: "2020-01-05T00:00:00.000Z",
-      note: "Get your thoughts down every morning",
+      note: "Builds up your skills",
       user_id: 4,
     },
   ];
