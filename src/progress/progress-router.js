@@ -2,10 +2,17 @@ const path = require("path");
 const express = require("express");
 const logger = require("../logger");
 const ProgressService = require("./progress-service");
-// const { getProgressValidationError } = require("./progress-validator");
+
+const { requireAuth } = require("../middleware/jwt-auth");
 
 const habitRouter = express.Router();
-// const bodyParser = express.json();
+const bodyParser = express.json();
+
+const SerializeProgress = (progress) => ({
+  id: progress.id,
+  datecreated: progress.date,
+  habit_id: progress.habit_id,
+});
 
 habitRouter.route("/").post((req, res) => {
   const { habit_id, date } = req.body;
