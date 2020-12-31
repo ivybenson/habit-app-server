@@ -14,7 +14,6 @@ const SerializeUser = (user) => ({
   id: user.id,
   email: xss(user.email),
   datecreated: user.datecreated,
-  name: xss(user.name),
 });
 
 usersRouter
@@ -28,7 +27,7 @@ usersRouter
     res.json(req.user);
   })
   .post(bodyParser, (req, res) => {
-    const { password, email, confirmPassword, name } = req.body;
+    const { password, email, confirmPassword } = req.body;
     const REGEX_UPPER_LOWER_NUMBER_SPECIAL = /(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@\$&\^&])[\S]+/;
 
     for (const field of ["email", "password", "confirmPassword"]) {
@@ -50,9 +49,9 @@ usersRouter
           "Password must contain one upper case character, one lower case character, one special character and one number ",
       });
     }
-    if (!password === confirmPassword) {
-      res.status(400).json({
-        error: "Password must match password confirmation",
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        error: `Passwords do not match`,
       });
     }
 
@@ -67,7 +66,6 @@ usersRouter
         const newUser = {
           email,
           password: hashedPassword,
-          name,
         };
 
         return UsersService.insertUser(knexInstance, newUser).then((user) => {
